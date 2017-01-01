@@ -12,7 +12,7 @@ Echo.sendmessage = function () {
 };
 
 Echo.sendBinary = function (message) {
-    console.log("binary message: " + message)
+    console.log("sending binary message: " + message)
     if (Echo.socket) {
         Echo.socket.send(message);
     }
@@ -44,8 +44,17 @@ Echo.connect = function (host) {
     }
 
     Echo.socket.onmessage = function (message) {
-        console.log("message: " + message.data);
-        $('#echoBack').append("\n" + message.data);
+        console.log("receiving message: " + message.data);
+        if (message instanceof Blob || typeof message === 'blob' ) {
+            console.log("this is a binary message.");
+            message.type = "image/jpg";
+            var urlCreator = window.URL || window.webkitURL;
+            var imageUrl = urlCreator.createObjectURL(message);
+            var img = $('#idavatar')[0];
+            img.src = imageUrl;
+        } else {
+            $('#echoBack').append("\n" + message.data);
+        }
     }
 };
 

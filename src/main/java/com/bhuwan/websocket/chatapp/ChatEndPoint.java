@@ -1,15 +1,20 @@
 package com.bhuwan.websocket.chatapp;
 
-import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
@@ -40,30 +45,41 @@ public class ChatEndPoint {
         broadcast(message);
     }
 
-    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    ByteBuffer buffer = ByteBuffer.allocate(204888);
 
     @OnMessage
     public void onMessage(ByteBuffer byteBuffer, boolean complete) {
         System.out.println("Inside onMessage binary:");
-        try {
-            
-            buffer.write(byteBuffer.array());
-            if (complete) {
-                for (ChatEndPoint client : clients) {
+        buffer.put(byteBuffer);
+        if (complete) {
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream("/tmp/bhuwan.jpg");
+                fos.write(buffer.array());
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(ChatEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(ChatEndPoint.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (fos != null) {
                     try {
-                        client.session.getBasicRemote().sendText("{\"call\":\"complete\"}");
+                        fos.flush();
+                        fos.close();
                     } catch (IOException ex) {
-                        clients.remove(this);
-                        try {
-                            client.session.close();
-                        } catch (IOException ex1) {
-                            // log here.
-                        }
+                        Logger.getLogger(ChatEndPoint.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+
+            for (ChatEndPoint client : clients) {
+                buffer.rewind();
+                client.session.getAsyncRemote().sendBinary(buffer, new SendHandler() {
+                    @Override
+                    public void onResult(SendResult result) {
+                        System.out.println(result.isOK());
+                    }
+                });
+            }
         }
     }
 
