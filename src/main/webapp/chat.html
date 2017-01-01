@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Start Page</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="scripts/chat.js"></script>
+    </head>
+    <body>
+        <textarea id="echo" cols="60" rows="15"></textarea>
+        <div id="echoBack"></div>
+        <div>
+            <input type="file" id="idfile">
+            <button id="idupload" onclick="uploadImage();">Upload</button>
+        </div>
+        <script>
+            function uploadImage() {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    rawData = reader.result;
+                    Echo.sendBinary(rawData);
+                };
+                reader.readAsArrayBuffer($('#idfile')[0].files[0]);
+            }
+        </script>
+    </body>
+</html>

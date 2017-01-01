@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bhuwan.websocket.chatapp;
+package com.bhuwan.websocket.echoapp;
 
 import java.io.IOException;
 

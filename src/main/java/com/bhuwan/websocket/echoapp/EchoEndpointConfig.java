@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.bhuwan.websocket.chatapp;
+package com.bhuwan.websocket.echoapp;
 
 /**
  * Note: Configuration only required for programmatic based websocket. You can remove
